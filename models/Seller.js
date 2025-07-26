@@ -1,0 +1,88 @@
+// models/Seller.js
+const mongoose = require("mongoose");
+
+const sellerSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true, // Stall/Shop Name
+  },
+  ownerName: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false, // Don't return password in queries
+  },
+  address: {
+    line: String,
+    locality: String,
+    city: String,
+    pincode: String,
+    state: String,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      // [longitude, latitude]
+      type: [Number],
+      required: true,
+    },
+  },
+  products: [{
+    type: String, // Product names
+  }],
+  shopPhoto: {
+    type: String, // URL (e.g., Cloudinary)
+  },
+  bannerImage: {
+    type: String,
+  },
+  fssaiNumber: {
+    type: String,
+  },
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
+  openingHours: {
+    open: String,  // e.g., "10:00 AM"
+    close: String, // e.g., "10:00 PM"
+  },
+  paymentInfo: {
+    upiId: String,
+    bankAccountNumber: String,
+    ifscCode: String,
+    accountHolderName: String,
+  },
+  ratings: {
+    type: Number,
+    default: 0,
+  },
+  totalReviews: {
+    type: Number,
+    default: 0,
+  },
+}, {
+  timestamps: true,
+});
+
+sellerSchema.index({ location: "2dsphere" }); // For geo queries
+
+module.exports = mongoose.model("Seller", sellerSchema);
