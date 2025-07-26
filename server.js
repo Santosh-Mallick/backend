@@ -1,6 +1,15 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const dbConnect = require('./config/db');
+
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'], // Allow frontend URLs
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware
 app.use(express.json({
@@ -47,6 +56,15 @@ const mapRoute = require('./routes/mapRoute');
 const authRoute = require('./routes/authRoute');
 app.use('/api/map', mapRoute);
 app.use('/api/auth', authRoute);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        message: 'Server is running!',
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Basic route
 app.get('/', (req, res) => {
