@@ -5,7 +5,7 @@ const dbConnect = require('./config/db');
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://frontend2-chi.vercel.app'], // Allow frontend URLs
+  origin: ['http://localhost:5173', 'https://frontend2-git-main-sant6225s-projects.vercel.app', 'https://frontend2-chi.vercel.app'], // Allow frontend URLs
   credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', "Access-Control-Allow-Credentials"]
