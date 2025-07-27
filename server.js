@@ -8,7 +8,7 @@ app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000', 'https://frontend2-chi.vercel.app'], // Allow frontend URLs
   credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', "Access-Control-Allow-Credentials"]
 }));
 
 app.use(express.json()); // Parse JSON bodies
