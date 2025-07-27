@@ -11,7 +11,7 @@ const {
 } = require('../controllers/buyerController');
 const { verifyToken } = require('../middleware/auth');
 
-router.use(verifyToken);
+// router.use(verifyToken);
 
 // Routes that require authentication
 router.post('/find-closest-sellers', findClosestSeller); // Now protected
