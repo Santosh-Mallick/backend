@@ -226,29 +226,31 @@ const getSellerProducts = async (req, res) => {
 
 const sellerDashboardDetails = async(req, res) => {
     try{
-        const { sellerId } = req.params;
+        const { sellerEmail } = req.params;
 
         // Validate seller ID
-        if (!sellerId) {
+        if (!sellerEmail) {
             return res.status(400).json({ message: 'Seller ID is required' });
         }
 
         // Find the seller by ID
-        const seller = await Seller.findById(sellerId).populate('products');
+        const seller = await Seller.findOne({email: sellerEmail});
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
 
         // Get total products and total earnings
         const totalProducts = seller.products.length;
+        const totalOrders = seller.orders.length;
+        const orders = seller.orders || [];
         // const totalEarnings = 
 
         res.status(200).json({
             message: 'Seller dashboard details retrieved successfully',
             details: {
                 totalProducts,
-                totalEarnings,
-                products: seller.products
+                totalOrders,
+                orders
             }
         });
     } catch(err) {
@@ -258,4 +260,4 @@ const sellerDashboardDetails = async(req, res) => {
 }
 
 
-module.exports = { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts };
+module.exports = { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts, sellerDashboardDetails };

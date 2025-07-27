@@ -71,6 +71,10 @@ const sellerSchema = new mongoose.Schema({
     open: String,  // e.g., "10:00 AM"
     close: String, // e.g., "10:00 PM"
   },
+  orders: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order',
+  }],
   paymentInfo: {
     upiId: String,
     bankAccountNumber: String,

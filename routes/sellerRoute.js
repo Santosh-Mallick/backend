@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts } = require('../controllers/sellerController');
+const { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts, sellerDashboardDetails } = require('../controllers/sellerController');
 const upload = require('../middleware/upload');
 
 // Route to add a product with image upload
@@ -17,5 +17,7 @@ router.put('/edit-product/:productId', editProduct);
 
 // Route to get all products of a seller
 router.get('/seller-products/:userEmail', getSellerProducts);
+
+router.get('/seller-dashboard/:sellerEmail', sellerDashboardDetails)
 
 module.exports = router; 
