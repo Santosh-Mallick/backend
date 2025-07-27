@@ -1,5 +1,79 @@
 const Seller = require('../models/Seller'); // Assuming you have a Seller model
 const Product = require('../models/Product'); // Assuming you have a Product model
+const cloudinary = require('../config/cloudinary');
+
+// Controller to add a product with image upload to Cloudinary
+const addProductWithImage = async (req, res) => {
+    try {
+        const { name, description, price, category, unit, quantity, pricePerUnitOption } = req.body;
+        const sellerId = req.body.seller || '6885b8d5494eb7af762072ff'; // Default seller ID for now
+
+        // Validate required fields
+        if (!name || !price || !category || !unit || !quantity) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Find the seller by ID
+        const seller = await Seller.findById(sellerId);
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        let imageUrl = null;
+
+        // Upload image to Cloudinary if provided
+        if (req.file) {
+            try {
+                // Convert buffer to base64
+                const b64 = Buffer.from(req.file.buffer).toString('base64');
+                const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+                // Upload to Cloudinary
+                const result = await cloudinary.uploader.upload(dataURI, {
+                    folder: 'products',
+                    resource_type: 'auto',
+                    transformation: [
+                        { width: 500, height: 500, crop: 'limit' },
+                        { quality: 'auto' }
+                    ]
+                });
+
+                imageUrl = result.secure_url;
+            } catch (uploadError) {
+                console.error('Cloudinary upload error:', uploadError);
+                return res.status(500).json({ message: 'Failed to upload image' });
+            }
+        }
+
+        // Create a new product
+        const product = new Product({
+            name,
+            description,
+            price: parseFloat(price),
+            category,
+            seller: sellerId,
+            unit,
+            quantity: parseInt(quantity, 10),
+            image: imageUrl,
+            pricePerUnitOption: pricePerUnitOption || unit
+        });
+
+        // Save the product to the database
+        const savedProduct = await product.save();
+
+        // Link the product to the seller
+        seller.products.push(savedProduct._id);
+        await seller.save();
+
+        res.status(201).json({ 
+            message: 'Product added successfully', 
+            product: savedProduct 
+        });
+    } catch (error) {
+        console.error('Add product error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
 // Controller to add a product and link it with the seller
 const addProduct = async (req, res) => {
@@ -120,14 +194,17 @@ const getSellerProducts = async (req, res) => {
         }
 
         // Find the seller by ID
-        const seller = await Seller.findById(sellerId).populate('products');
+        const seller = await Seller.findById(sellerId);
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
 
+        // Find all products for this seller
+        const allProducts = await Product.find({ seller: sellerId });
+
         // Separate products with quantity 0
-        const productsWithZeroQuantity = seller.products.filter(product => product.quantity === 0);
-        const otherProducts = seller.products.filter(product => product.quantity > 0);
+        const productsWithZeroQuantity = allProducts.filter(product => product.quantity === 0);
+        const otherProducts = allProducts.filter(product => product.quantity > 0);
 
         res.status(200).json({
             message: 'Products retrieved successfully',
@@ -143,4 +220,4 @@ const getSellerProducts = async (req, res) => {
 };
 
 
-module.exports = { addProduct, deleteProduct, editProduct, getSellerProducts };
+module.exports = { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts };

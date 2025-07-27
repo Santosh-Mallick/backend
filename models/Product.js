@@ -41,6 +41,12 @@ const ProductSchema = new Schema({
         enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'],
         required: true,
     },
+    pricePerUnitOption: {
+        type: String,
+        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'],
+        required: true,
+        default: 'pieces',
+    },
     image: {
         type: String,
         trim: true,
