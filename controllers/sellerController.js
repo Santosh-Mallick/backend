@@ -1,6 +1,7 @@
 const Seller = require('../models/Seller'); // Assuming you have a Seller model
 const Product = require('../models/Product'); // Assuming you have a Product model
 const cloudinary = require('../config/cloudinary');
+const Order = require('../models/Order');
 
 // Controller to add a product with image upload to Cloudinary
 const addProductWithImage = async (req, res) => {
@@ -242,8 +243,13 @@ const sellerDashboardDetails = async(req, res) => {
         // Get total products and total earnings
         const totalProducts = seller.products.length;
         const totalOrders = seller.orders.length;
-        const orders = seller.orders || [];
+        // const orders = seller.orders || [];
         // const totalEarnings = 
+
+        // Get all the orders from the Order object 
+        console.log("Seller : ", seller._id);
+        const orders = await Order.find({ sellerId: seller._id });
+        console.log("Orders : ", orders);
 
         res.status(200).json({
             message: 'Seller dashboard details retrieved successfully',
