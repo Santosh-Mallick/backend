@@ -268,6 +268,38 @@ const applyCreditPoints = async (req, res) => {
     }
 };
 
+const getAllProductsFromClosestSellers = async (req, res) => {
+    try {
+        const { productIDs } = req.body;
+        if (!productIDs || !Array.isArray(productIDs) || productIDs.length === 0) {
+            return res.status(400).json({ message: 'Product IDs are required' });
+        }
+
+        // Find all products matching the provided IDs
+        const products = await Product.find({ _id: { $in: productIDs } });
+        if (products.length === 0) {
+            return res.status(404).json({ message: 'No products found for the provided IDs' });
+        }
+        // Group products by seller
+        const productsBySeller = {};
+        products.forEach(product => {
+            if (!productsBySeller[product.seller]) {
+                productsBySeller[product.seller] = [];
+            }
+            productsBySeller[product.seller].push(product);
+        });
+        res.status(200).json({
+            message: 'Products retrieved successfully',
+            productsBySeller: productsBySeller
+        });
+
+    }
+    catch (error) {
+        console.error('Error retrieving products from closest sellers:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
 module.exports = { 
     placeOrder, 
     cancelOrder, 
@@ -276,5 +308,6 @@ module.exports = {
     awardEcoFriendlyPoints,
     useCreditPoints,
     calculateEcoFriendlyPoints,
-    getSellerProductsForBuyer
+    getSellerProductsForBuyer,
+    getAllProductsFromClosestSellers
 };

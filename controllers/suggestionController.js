@@ -38,6 +38,7 @@ const findClosestSeller = async (req, res) => {
 
         let sellersWithinRange = [];
         let sellersBeyondRange = [];
+        const uniqueProductIDs = new Set(); // Use a Set to store unique product IDs
 
         // Calculate distance for each relevant seller
         sellers.forEach(seller => {
@@ -45,6 +46,11 @@ const findClosestSeller = async (req, res) => {
             const sellerLon = seller.location.coordinates[0]; // Longitude is the first element
 
             const distance = haversineDistance(buyerLat, buyerLon, sellerLat, sellerLon);
+
+            // Add all products from this seller to the uniqueProductIDs set
+            if (seller.products && Array.isArray(seller.products)) {
+                seller.products.forEach(product => uniqueProductIDs.add(product));
+            }
 
             if (distance <= maxDistance) {
                 sellersWithinRange.push({
@@ -62,6 +68,9 @@ const findClosestSeller = async (req, res) => {
         // Sort sellers by distance (closest first)
         sellersWithinRange.sort((a, b) => a.distance - b.distance);
         sellersBeyondRange.sort((a, b) => a.distance - b.distance);
+
+        // Convert the Set of unique product IDs to an array
+        const allUniqueProductIDsArray = Array.from(uniqueProductIDs);
 
         if (sellersWithinRange.length > 0) {
             // Found sellers within MAX_DISTANCE_KM
@@ -81,7 +90,8 @@ const findClosestSeller = async (req, res) => {
                     products: s.seller.products,
                     distance_km: parseFloat(s.distance.toFixed(2))
                 })),
-                note: `There are ${sellersWithinRange.length} sellers ${responseMessagePrefix} within ${maxDistance} km.`
+                note: `There are ${sellersWithinRange.length} sellers ${responseMessagePrefix} within ${maxDistance} km.`,
+                uniqueProductIDsFound: allUniqueProductIDsArray // Added unique product IDs here
             });
         } else if (sellersBeyondRange.length > 0) {
             // No sellers within MAX_DISTANCE_KM, but found some beyond
@@ -97,15 +107,19 @@ const findClosestSeller = async (req, res) => {
                 allSellersBeyondRange: sellersBeyondRange.map(s => ({
                     name: s.seller.name,
                     phone: s.seller.phone,
+                    id: s.seller._id, // Assuming _id is available and relevant here too
+                    products: s.seller.products, // Include products for sellers beyond range as well
                     distance_km: parseFloat(s.distance.toFixed(2))
                 })),
-                blinkitSuggestion: getBlinkitSearchUrl(productName)
+                blinkitSuggestion: getBlinkitSearchUrl(productName),
+                uniqueProductIDsFound: allUniqueProductIDsArray // Added unique product IDs here
             });
         } else {
             // No sellers found for the product (or any sellers if productName was empty)
             return res.status(200).json({
                 message: `No sellers found ${responseMessagePrefix} in our database.`,
-                blinkitSuggestion: getBlinkitSearchUrl(productName)
+                blinkitSuggestion: getBlinkitSearchUrl(productName),
+                uniqueProductIDsFound: allUniqueProductIDsArray // Added unique product IDs here
             });
         }
 
@@ -114,6 +128,7 @@ const findClosestSeller = async (req, res) => {
         return res.status(500).json({ message: 'Server error while processing your request.' });
     }
 };
+
 
 module.exports = {
     findClosestSeller

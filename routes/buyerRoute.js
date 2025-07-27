@@ -7,7 +7,8 @@ const {
     cancelOrder,
     getCreditWallet,
     applyCreditPoints,
-    getSellerProductsForBuyer // Ensure this is imported for the route below
+    getSellerProductsForBuyer, // Ensure this is imported for the route below
+    getAllProductsFromClosestSellers
 } = require('../controllers/buyerController');
 const { verifyToken } = require('../middleware/auth');
 
@@ -25,5 +26,6 @@ router.put('/cancel-order/:orderId', cancelOrder);
 router.get('/credit-wallet/:buyerId', getCreditWallet);
 router.post('/apply-credit-points/:buyerId', applyCreditPoints);
 
+router.post('/get-all-seller-products', getAllProductsFromClosestSellers);
 
 module.exports = router;
