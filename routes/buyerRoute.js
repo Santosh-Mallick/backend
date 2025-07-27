@@ -8,7 +8,8 @@ const {
     getCreditWallet,
     applyCreditPoints,
     getSellerProductsForBuyer, // Ensure this is imported for the route below
-    getAllProductsFromClosestSellers
+    getAllProductsFromClosestSellers,
+    debugCreditPoints
 } = require('../controllers/buyerController');
 const { verifyToken } = require('../middleware/auth');
 
@@ -27,5 +28,8 @@ router.get('/credit-wallet/:buyerId', getCreditWallet);
 router.post('/apply-credit-points/:buyerId', applyCreditPoints);
 
 router.post('/get-all-seller-products', getAllProductsFromClosestSellers);
+
+// Debug route for credit points
+router.post('/debug-credit-points', debugCreditPoints);
 
 module.exports = router;
