@@ -5,7 +5,7 @@ const dbConnect = require('./config/db');
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Allow frontend URLs
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://4nszb003-5173.inc1.devtunnels.ms'], // Allow frontend URLs
   credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

@@ -62,6 +62,25 @@ const buyerSchema = new mongoose.Schema({
       required: true,
     },
   },
+  cart: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 1, // Default quantity is 1
+      },
+      unit: {
+        type: String,
+        enum: ["pieces", "kg", "gram", "litre", "ml", "packet"],
+        required: true,
+        default: "pieces", // Default unit is pieces
+      },
+    },
+  ],
   orderHistory: [orderHistorySchema],
   ecoPoints: {
     type: Number,
