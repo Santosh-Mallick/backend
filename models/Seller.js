@@ -60,6 +60,9 @@ const sellerSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  categories: [{
+    type: String, // e.g., "Groceries", "Fruits", "Vegetables"
+  }],
   isOpen: {
     type: Boolean,
     default: false,

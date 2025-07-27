@@ -1,4 +1,6 @@
 const Order = require('../models/Order'); // Assuming you have an Order model
+const Seller = require('../models/Seller');
+const Product = require('../models/Product');
 
 const placeOrder = async (req, res) => {
     try {
@@ -67,4 +69,39 @@ const cancelOrder = async (req, res) => {
     }
 };
 
-module.exports = { placeOrder, cancelOrder };
+const getSellerProductsForBuyer = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        // Validate seller ID
+        if (!sellerId) {
+            return res.status(400).json({ message: 'Seller ID is required' });
+        }
+
+        // Find the seller by ID
+        const seller = await Seller.findById(sellerId);
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        // Find all products for this seller
+        const allProducts = await Product.find({ seller: sellerId });
+
+        // Separate products with quantity 0
+        const productsWithZeroQuantity = allProducts.filter(product => product.quantity === 0);
+        const otherProducts = allProducts.filter(product => product.quantity > 0);
+
+        res.status(200).json({
+            message: 'Products retrieved successfully',
+            products: {
+                available: otherProducts,
+                outOfStock: productsWithZeroQuantity
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { placeOrder, cancelOrder, getSellerProductsForBuyer };

@@ -69,12 +69,14 @@ exports.findClosestSeller = async (req, res) => {
                 message: `Closest seller found within range.`,
                 closestSeller: {
                     name: sellersWithinRange[0].seller.name,
+                    phone: sellersWithinRange[0].seller.phone,
                     location: sellersWithinRange[0].seller.location,
                     products: sellersWithinRange[0].seller.products,
                     distance_km: parseFloat(sellersWithinRange[0].distance.toFixed(2))
                 },
                 allSellersWithinRange: sellersWithinRange.map(s => ({
                     name: s.seller.name,
+                    phone: s.seller.phone,
                     id: s.seller._id,
                     products: s.seller.products,
                     distance_km: parseFloat(s.distance.toFixed(2))
@@ -87,12 +89,14 @@ exports.findClosestSeller = async (req, res) => {
                 message: `No sellers found ${responseMessagePrefix} within ${maxDistance} km. Closest seller found beyond range.`,
                 closestSeller: {
                     name: sellersBeyondRange[0].seller.name,
+                    phone: sellersBeyondRange[0].seller.phone,
                     location: sellersBeyondRange[0].seller.location,
                     products: sellersBeyondRange[0].seller.products,
                     distance_km: parseFloat(sellersBeyondRange[0].distance.toFixed(2))
                 },
                 allSellersBeyondRange: sellersBeyondRange.map(s => ({
                     name: s.seller.name,
+                    phone: s.seller.phone,
                     distance_km: parseFloat(s.distance.toFixed(2))
                 })),
                 blinkitSuggestion: getBlinkitSearchUrl(productName)
