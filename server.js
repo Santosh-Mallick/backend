@@ -11,6 +11,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
 // Load environment variables
 require('dotenv').config();
 
@@ -21,6 +24,7 @@ dbConnect();
 const mapRoute = require('./routes/mapRoute');
 const authRoute = require('./routes/authRoute');
 const sellerRoute = require('./routes/sellerRoute');
+const buyerRoute = require('./routes/buyerRoute');
 
 // Apply JSON parsing middleware only to routes that need it
 app.use('/api/auth', express.json({
@@ -44,6 +48,7 @@ app.use('/api/auth', express.json({
 app.use('/api/map', mapRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/seller', sellerRoute);
+app.use('/api/buyer', buyerRoute);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

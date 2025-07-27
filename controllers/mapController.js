@@ -5,7 +5,7 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const dLat = toRadians(lat2 - lat1);
     const dLon = toRadians(lon2 - lon1);
 
-    const a = 
+    const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -20,9 +20,10 @@ const getDistance = (req, res) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) {
         return res.status(400).json({ error: "All coordinates (lat1, lon1, lat2, lon2) are required." });
     }
-
     const distance = haversineDistance(lat1, lon1, lat2, lon2);
-    return res.status(200).json({ distance });
+    const distanceTwoDecimalPlaces = parseFloat(distance.toFixed(2));
+
+    return res.status(200).json({ distance: distanceTwoDecimalPlaces });
 };
 
 module.exports = { getDistance };

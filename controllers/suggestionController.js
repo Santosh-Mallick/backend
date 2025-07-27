@@ -1,7 +1,7 @@
 const Seller = require('../models/Seller');
 
 // Call the Haversine formula to calculate distance between two coordinates
-const { calculateHaversineDistance } = require('../utils/HaversianDistance');
+const { haversineDistance } = require('../utils/HaversianDistance');
 const { getBlinkitSearchUrl } = require('../utils/BlinkitSearchURL');
 // const MAX_DISTANCE_KM = 12; // Maximum distance to consider sellers within range
 
@@ -9,14 +9,32 @@ const { getBlinkitSearchUrl } = require('../utils/BlinkitSearchURL');
 exports.findClosestSeller = async (req, res) => {
     const { buyerLat, buyerLon, productName, MAX_DISTANCE_KM } = req.body;
 
-    // Input validation
-    if (typeof buyerLat !== 'number' || typeof buyerLon !== 'number' || !productName) {
-        return res.status(400).json({ message: 'Missing or invalid buyer location or product name.' });
+    // Input validation for buyer location and max distance
+    // productName is now optional for the 'find all within range' scenario
+    if (typeof buyerLat !== 'number' || typeof buyerLon !== 'number') {
+        return res.status(400).json({ message: 'Missing or invalid buyer location (buyerLat, buyerLon).' });
     }
 
+    // Default MAX_DISTANCE_KM if not provided or invalid
+    const maxDistance = typeof MAX_DISTANCE_KM === 'number' && MAX_DISTANCE_KM > 0 ? MAX_DISTANCE_KM : 35; // Default to 35km if not specified
+
     try {
-        // Find all sellers who offer the requested product
-        const sellers = await Seller.find({ products: { $in: [new RegExp(productName, 'i')] } }); // Case-insensitive search
+        let sellersQuery = {}; // Initialize an empty query
+        let responseMessagePrefix = '';
+
+        // Determine the query based on productName presence
+        if (productName && productName.trim() !== '') {
+            // Case-insensitive search for product
+            sellersQuery = { products: { $in: [new RegExp(productName, 'i')] } };
+            responseMessagePrefix = `offering "${productName}"`;
+        } else {
+            // If productName is empty, we will find all sellers
+            // No specific product filter needed, so sellersQuery remains {}
+            responseMessagePrefix = 'in our database';
+        }
+
+        // Find all sellers based on the determined query
+        const sellers = await Seller.find(sellersQuery);
 
         let sellersWithinRange = [];
         let sellersBeyondRange = [];
@@ -26,9 +44,9 @@ exports.findClosestSeller = async (req, res) => {
             const sellerLat = seller.location.coordinates[1]; // Latitude is the second element
             const sellerLon = seller.location.coordinates[0]; // Longitude is the first element
 
-            const distance = calculateHaversineDistance(buyerLat, buyerLon, sellerLat, sellerLon);
+            const distance = haversineDistance(buyerLat, buyerLon, sellerLat, sellerLon);
 
-            if (distance <= MAX_DISTANCE_KM) {
+            if (distance <= maxDistance) {
                 sellersWithinRange.push({
                     seller: seller,
                     distance: distance
@@ -46,9 +64,9 @@ exports.findClosestSeller = async (req, res) => {
         sellersBeyondRange.sort((a, b) => a.distance - b.distance);
 
         if (sellersWithinRange.length > 0) {
-            // Found sellers within 35km, return the closest one
+            // Found sellers within MAX_DISTANCE_KM
             return res.status(200).json({
-                message: 'Closest seller found within range.',
+                message: `Closest seller found within range.`,
                 closestSeller: {
                     name: sellersWithinRange[0].seller.name,
                     location: sellersWithinRange[0].seller.location,
@@ -57,14 +75,16 @@ exports.findClosestSeller = async (req, res) => {
                 },
                 allSellersWithinRange: sellersWithinRange.map(s => ({
                     name: s.seller.name,
+                    id: s.seller._id,
+                    products: s.seller.products,
                     distance_km: parseFloat(s.distance.toFixed(2))
                 })),
-                note: `There are ${sellersWithinRange.length} sellers offering "${productName}" within ${MAX_DISTANCE_KM} km.`
+                note: `There are ${sellersWithinRange.length} sellers ${responseMessagePrefix} within ${maxDistance} km.`
             });
         } else if (sellersBeyondRange.length > 0) {
-            // No sellers within 35km, but found some beyond
+            // No sellers within MAX_DISTANCE_KM, but found some beyond
             return res.status(200).json({
-                message: `No sellers found within ${MAX_DISTANCE_KM} km. Closest seller found beyond range.`,
+                message: `No sellers found ${responseMessagePrefix} within ${maxDistance} km. Closest seller found beyond range.`,
                 closestSeller: {
                     name: sellersBeyondRange[0].seller.name,
                     location: sellersBeyondRange[0].seller.location,
@@ -78,9 +98,9 @@ exports.findClosestSeller = async (req, res) => {
                 blinkitSuggestion: getBlinkitSearchUrl(productName)
             });
         } else {
-            // No sellers found for the product at all
+            // No sellers found for the product (or any sellers if productName was empty)
             return res.status(200).json({
-                message: `No sellers found offering "${productName}" in our database.`,
+                message: `No sellers found ${responseMessagePrefix} in our database.`,
                 blinkitSuggestion: getBlinkitSearchUrl(productName)
             });
         }
