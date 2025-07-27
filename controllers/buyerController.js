@@ -218,7 +218,7 @@ const getSellerProductsForBuyer = async (req, res) => {
     }
 };
 
-module.exports = { placeOrder, cancelOrder, getSellerProductsForBuyer };
+// module.exports = { placeOrder, cancelOrder, getSellerProductsForBuyer };
 // Get buyer's credit wallet information
 const getCreditWallet = async (req, res) => {
     try {
@@ -275,5 +275,6 @@ module.exports = {
     applyCreditPoints,
     awardEcoFriendlyPoints,
     useCreditPoints,
-    calculateEcoFriendlyPoints
+    calculateEcoFriendlyPoints,
+    getSellerProductsForBuyer
 };

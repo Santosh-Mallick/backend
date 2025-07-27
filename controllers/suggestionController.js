@@ -6,7 +6,7 @@ const { getBlinkitSearchUrl } = require('../utils/BlinkitSearchURL');
 // const MAX_DISTANCE_KM = 12; // Maximum distance to consider sellers within range
 
 
-exports.findClosestSeller = async (req, res) => {
+const findClosestSeller = async (req, res) => {
     const { buyerLat, buyerLon, productName, MAX_DISTANCE_KM } = req.body;
 
     // Input validation for buyer location and max distance
@@ -113,4 +113,8 @@ exports.findClosestSeller = async (req, res) => {
         console.error('Error finding closest seller:', error);
         return res.status(500).json({ message: 'Server error while processing your request.' });
     }
+};
+
+module.exports = {
+    findClosestSeller
 };
