@@ -8,6 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 // Buyer Registration
 exports.registerBuyer = async (req, res) => {
   try {
+    console.log('Backend - Buyer registration request body:', req.body);
     const { name, phone, email, password, address, location } = req.body;
     
     // Input validation
@@ -60,9 +61,16 @@ exports.registerBuyer = async (req, res) => {
     const buyer = new Buyer({ name, phone, email, password, address, location });
     await buyer.save();
     
+    console.log('Backend - Buyer created successfully:', buyer._id);
+    
+    // Generate token
+    const token = jwt.sign({ id: buyer._id, role: 'buyer' }, JWT_SECRET, { expiresIn: '7d' });
+    
     res.status(201).json({ 
       message: 'Buyer registered successfully',
-      buyer: {
+      token,
+      role: 'buyer',
+      user: {
         id: buyer._id,
         name: buyer.name,
         phone: buyer.phone,
@@ -70,6 +78,7 @@ exports.registerBuyer = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Backend - Buyer registration error:', err);
     if (err.name === 'ValidationError') {
       const errors = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ message: 'Validation error', errors });
@@ -84,20 +93,21 @@ exports.registerBuyer = async (req, res) => {
 // Seller Registration
 exports.registerSeller = async (req, res) => {
   try {
-    const { name, ownerName, email, phone, password, address, location, products } = req.body;
+    console.log('Backend - Seller registration request body:', req.body);
+    const { name, ownerName, email, phone, password, address, location, products, fssaiNumber } = req.body;
     
     // Input validation
-    if (!name || !ownerName || !phone || !password) {
+    if (!name || !ownerName || !phone || !password || !fssaiNumber) {
       return res.status(400).json({ 
         message: 'Missing required fields', 
-        required: ['name', 'ownerName', 'phone', 'password'] 
+        required: ['name', 'ownerName', 'phone', 'password', 'fssaiNumber'] 
       });
     }
 
-    if (typeof name !== 'string' || typeof ownerName !== 'string' || typeof phone !== 'string' || typeof password !== 'string') {
+    if (typeof name !== 'string' || typeof ownerName !== 'string' || typeof phone !== 'string' || typeof password !== 'string' || typeof fssaiNumber !== 'string') {
       return res.status(400).json({ 
         message: 'Invalid data types', 
-        details: 'name, ownerName, phone, and password must be strings' 
+        details: 'name, ownerName, phone, password, and fssaiNumber must be strings' 
       });
     }
 
@@ -110,6 +120,12 @@ exports.registerSeller = async (req, res) => {
     if (phone.length < 10) {
       return res.status(400).json({ 
         message: 'Phone number must be at least 10 digits' 
+      });
+    }
+
+    if (fssaiNumber.trim() === '') {
+      return res.status(400).json({ 
+        message: 'FSSAI number cannot be empty' 
       });
     }
 
@@ -139,12 +155,29 @@ exports.registerSeller = async (req, res) => {
       }
     }
 
-    const seller = new Seller({ name, ownerName, email, phone, password, address, location, products });
+    const seller = new Seller({ 
+      name, 
+      ownerName, 
+      email, 
+      phone, 
+      password, 
+      address, 
+      location, 
+      products,
+      fssaiNumber // Now required, so always include it
+    });
     await seller.save();
+    
+    console.log('Backend - Seller created successfully:', seller._id);
+    
+    // Generate token
+    const token = jwt.sign({ id: seller._id, role: 'seller' }, JWT_SECRET, { expiresIn: '7d' });
     
     res.status(201).json({ 
       message: 'Seller registered successfully',
-      seller: {
+      token,
+      role: 'seller',
+      user: {
         id: seller._id,
         name: seller.name,
         ownerName: seller.ownerName,
@@ -154,6 +187,7 @@ exports.registerSeller = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Backend - Seller registration error:', err);
     if (err.name === 'ValidationError') {
       const errors = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ message: 'Validation error', errors });

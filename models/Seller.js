@@ -57,6 +57,8 @@ const sellerSchema = new mongoose.Schema({
   },
   fssaiNumber: {
     type: String,
+    required: true,
+    unique: true,
   },
   isOpen: {
     type: Boolean,
