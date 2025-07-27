@@ -31,6 +31,20 @@ const ProductSchema = new Schema({
         required: true,
         default: 0,
     },
+    per_unit: {
+        type: Number,
+        required: true,
+        default: 1, // Default to 1 if not specified
+    },
+    unit: {
+        type: String,
+        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'],
+        required: true,
+    },
+    image: {
+        type: String,
+        trim: true,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

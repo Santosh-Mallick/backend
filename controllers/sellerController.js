@@ -4,7 +4,7 @@ const Product = require('../models/Product'); // Assuming you have a Product mod
 // Controller to add a product and link it with the seller
 const addProduct = async (req, res) => {
     try {
-        const { sellerId, name, description, price, category } = req.body;
+        const { sellerId, name, description, price, category, unit, quantity } = req.body;
 
         // Validate required fields
         if (!sellerId || !name || !price || !category) {
@@ -24,6 +24,8 @@ const addProduct = async (req, res) => {
             price,
             category,
             seller: sellerId,
+            unit,
+            quantity
         });
 
         // Save the product to the database
