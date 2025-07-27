@@ -19,7 +19,7 @@ const OrderSchema = new mongoose.Schema({
                     type: String,
                     required: true,
                     enum: [ // Define an enum for common units to ensure consistency
-                        'kg', 'g', 'ml', 'l', 'pieces', 'packs', 'bottles', 'dozen', 'units', 'boxes', 'cans'
+                        'kg', 'g', 'ml', 'l', 'pieces', 'piece', 'packs', 'pack', 'bottles', 'dozen', 'units', 'boxes', 'cans', 'bunch'
                     ],
                     default: 'pieces', // A sensible default unit if not specified
                 },
@@ -30,14 +30,26 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    orderDate: {
+    createdAt: {
         type: Date,
         default: Date.now,
     },
-    customer: {
+    buyerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Buyer',
         required: true,
+    },
+    sellerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Seller',
+        required: true,
+    },
+    shippingAddress: {
+        line: String,
+        locality: String,
+        city: String,
+        pincode: String,
+        state: String,
     },
     status: {
         type: String,

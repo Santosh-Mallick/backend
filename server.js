@@ -26,8 +26,26 @@ const authRoute = require('./routes/authRoute');
 const sellerRoute = require('./routes/sellerRoute');
 const buyerRoute = require('./routes/buyerRoute');
 
-// Apply JSON parsing middleware only to routes that need it
+// Apply JSON parsing middleware to routes that need it
 app.use('/api/auth', express.json({
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf);
+    } catch (e) {
+      res.status(400).json({ 
+        message: 'Invalid JSON format', 
+        details: 'Please check your JSON syntax. Make sure all string values are in quotes.',
+        example: {
+          "phone": "1234567890",
+          "password": "password123"
+        }
+      });
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+
+app.use('/api/buyer', express.json({
   verify: (req, res, buf) => {
     try {
       JSON.parse(buf);
