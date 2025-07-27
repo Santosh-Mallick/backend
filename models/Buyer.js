@@ -86,6 +86,20 @@ const buyerSchema = new mongoose.Schema({
     type: Number,
     default: 0, // Earned for eco-friendly bag usage
   },
+  creditWallet: {
+    points: {
+      type: Number,
+      default: 0, // Credit points earned from eco-friendly purchases
+    },
+    totalEarned: {
+      type: Number,
+      default: 0, // Total points ever earned
+    },
+    totalUsed: {
+      type: Number,
+      default: 0, // Total points ever used
+    }
+  },
   referredBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Buyer",

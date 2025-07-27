@@ -51,6 +51,10 @@ const ProductSchema = new Schema({
         type: String,
         trim: true,
     },
+    isEcoFriendly: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
         type: Date,
         default: Date.now,
