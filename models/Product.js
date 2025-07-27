@@ -38,12 +38,12 @@ const ProductSchema = new Schema({
     },
     unit: {
         type: String,
-        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'],
+        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet', 'dozen'],
         required: true,
     },
     pricePerUnitOption: {
         type: String,
-        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'],
+        enum: ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet', 'dozen'],
         required: true,
         default: 'pieces',
     },

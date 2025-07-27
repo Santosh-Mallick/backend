@@ -5,8 +5,9 @@ const cloudinary = require('../config/cloudinary');
 // Controller to add a product with image upload to Cloudinary
 const addProductWithImage = async (req, res) => {
     try {
-        const { name, description, price, category, unit, quantity, pricePerUnitOption } = req.body;
-        const sellerId = req.body.seller || '6885b8d5494eb7af762072ff'; // Default seller ID for now
+        const { name, description, price, category, unit, quantity, pricePerUnitOption, sellerMail } = req.body;
+        // const sellerId = req.body.seller || '6885b8d5494eb7af762072ff'; // Default seller ID for now
+
 
         // Validate required fields
         if (!name || !price || !category || !unit || !quantity) {
@@ -14,10 +15,12 @@ const addProductWithImage = async (req, res) => {
         }
 
         // Find the seller by ID
-        const seller = await Seller.findById(sellerId);
+        const seller = await Seller.findOne({email: sellerMail});
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
+
+        const sellerId = seller._id; // Use the found seller's ID
 
         let imageUrl = null;
 
@@ -186,18 +189,20 @@ const editProduct = async (req, res) => {
 // Get all products of a particular seller
 const getSellerProducts = async (req, res) => {
     try {
-        const { sellerId } = req.params;
+        const { userEmail } = req.params;
 
         // Validate seller ID
-        if (!sellerId) {
+        if (!userEmail) {
             return res.status(400).json({ message: 'Seller ID is required' });
         }
 
         // Find the seller by ID
-        const seller = await Seller.findById(sellerId);
+        const seller = await Seller.findOne({email: userEmail});
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
+
+        const sellerId = seller._id; 
 
         // Find all products for this seller
         const allProducts = await Product.find({ seller: sellerId });
@@ -218,6 +223,39 @@ const getSellerProducts = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+const sellerDashboardDetails = async(req, res) => {
+    try{
+        const { sellerId } = req.params;
+
+        // Validate seller ID
+        if (!sellerId) {
+            return res.status(400).json({ message: 'Seller ID is required' });
+        }
+
+        // Find the seller by ID
+        const seller = await Seller.findById(sellerId).populate('products');
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+
+        // Get total products and total earnings
+        const totalProducts = seller.products.length;
+        // const totalEarnings = 
+
+        res.status(200).json({
+            message: 'Seller dashboard details retrieved successfully',
+            details: {
+                totalProducts,
+                totalEarnings,
+                products: seller.products
+            }
+        });
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
 
 
 module.exports = { addProductWithImage, addProduct, deleteProduct, editProduct, getSellerProducts };

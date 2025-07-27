@@ -16,6 +16,6 @@ router.delete('/delete-product/:productId', deleteProduct);
 router.put('/edit-product/:productId', editProduct);
 
 // Route to get all products of a seller
-router.get('/seller-products/:sellerId', getSellerProducts);
+router.get('/seller-products/:userEmail', getSellerProducts);
 
 module.exports = router; 
