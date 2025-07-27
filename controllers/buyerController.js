@@ -6,37 +6,33 @@ const Buyer = require('../models/Buyer');
 // Function to calculate eco-friendly points based on cart items
 const calculateEcoFriendlyPoints = async (products) => {
   try {
-    let totalEcoFriendlyBags = 0;
+    let totalEcoFriendlyPieces = 0;
     
-    // Mock product data for demo (matching frontend data)
-    const mockProducts = {
-      1: { isEcoFriendly: false },  // Tomatoes
-      2: { isEcoFriendly: false },  // Organic Spinach
-      3: { isEcoFriendly: false },  // Apples
-      4: { isEcoFriendly: false },  // Potatoes
-      5: { isEcoFriendly: false },  // Green Bell Peppers
-      6: { isEcoFriendly: false },  // Bananas
-      7: { isEcoFriendly: true },   // Eco-Friendly Bags (Pack of 50) - ONLY THIS EARNS POINTS
-    };
+    // Import Product model
+    const Product = require('../models/Product');
     
     for (const item of products) {
-      // Extract the original numeric ID from the ObjectId
-      const numericId = parseInt(item.productId.slice(-2));
-      const product = mockProducts[numericId];
-      
-      if (product && product.isEcoFriendly) {
-        // For eco-friendly bags (pack of 50), multiply quantity by 50
-        const itemQuantity = item.quantity.value || item.quantity || 1;
-        const bagsPerPack = 50; // Each pack contains 50 bags
-        const totalBags = itemQuantity * bagsPerPack;
-        totalEcoFriendlyBags += totalBags;
-        console.log(`Eco bag calculation: ${itemQuantity} packs × ${bagsPerPack} bags = ${totalBags} total bags`);
+      try {
+        // Find the product in the database
+        const product = await Product.findById(item.productId);
+        
+        if (product && product.isEcoFriendly) {
+          // For eco-friendly products (pack of 50), multiply quantity by 50
+          const itemQuantity = item.quantity.value || item.quantity || 1;
+          const piecesPerPack = 50; // Each pack contains 50 pieces
+          const totalPieces = itemQuantity * piecesPerPack;
+          totalEcoFriendlyPieces += totalPieces;
+          console.log(`Eco product calculation: ${product.name} - ${itemQuantity} packs × ${piecesPerPack} pieces = ${totalPieces} total pieces`);
+        }
+      } catch (error) {
+        console.error(`Error processing product ${item.productId}:`, error);
+        // Continue with other products even if one fails
       }
     }
     
-    // Award 1 point for every 100 eco-friendly bags
-    const points = Math.floor(totalEcoFriendlyBags / 100);
-    console.log(`Eco-friendly calculation: ${totalEcoFriendlyBags} bags = ${points} points`);
+    // Award 1 point for every 100 eco-friendly pieces
+    const points = Math.floor(totalEcoFriendlyPieces / 100);
+    console.log(`Eco-friendly calculation: ${totalEcoFriendlyPieces} pieces = ${points} points`);
     return points;
   } catch (error) {
     console.error('Error calculating eco-friendly points:', error);
@@ -219,6 +215,34 @@ const getSellerProductsForBuyer = async (req, res) => {
     }
 };
 
+// Debug endpoint to test credit point calculation
+const debugCreditPoints = async (req, res) => {
+  try {
+    const { products } = req.body;
+    
+    if (!products || !Array.isArray(products)) {
+      return res.status(400).json({ message: 'Products array is required' });
+    }
+    
+    console.log('Debug: Testing credit point calculation with products:', products);
+    
+    const points = await calculateEcoFriendlyPoints(products);
+    
+    res.status(200).json({
+      message: 'Credit point calculation debug',
+      products: products,
+      pointsCalculated: points,
+      calculationDetails: {
+        totalProducts: products.length,
+        ecoFriendlyProducts: products.filter(p => p.isEcoFriendly).length
+      }
+    });
+  } catch (error) {
+    console.error('Error in debug credit points:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
 // module.exports = { placeOrder, cancelOrder, getSellerProductsForBuyer };
 // Get buyer's credit wallet information
 const getCreditWallet = async (req, res) => {
@@ -310,5 +334,6 @@ module.exports = {
     useCreditPoints,
     calculateEcoFriendlyPoints,
     getSellerProductsForBuyer,
-    getAllProductsFromClosestSellers
+    getAllProductsFromClosestSellers,
+    debugCreditPoints
 };
