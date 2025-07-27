@@ -19,7 +19,7 @@ const OrderSchema = new mongoose.Schema({
                     type: String,
                     required: true,
                     enum: [ // Define an enum for common units to ensure consistency
-                        'kg', 'g', 'ml', 'l', 'pieces', 'piece', 'packs', 'pack', 'bottles', 'dozen', 'units', 'boxes', 'cans', 'bunch'
+                        'kg', 'g', 'ml', 'l', 'pieces', 'piece', 'packs', 'packet', 'bottles', 'dozen', 'units', 'boxes', 'cans', 'bunch'
                     ],
                     default: 'pieces', // A sensible default unit if not specified
                 },

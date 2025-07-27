@@ -1,6 +1,7 @@
 const Order = require('../models/Order'); // Assuming you have an Order model
 const Seller = require('../models/Seller');
 const Product = require('../models/Product');
+const Buyer = require('../models/Buyer');
 
 // Function to calculate eco-friendly points based on cart items
 const calculateEcoFriendlyPoints = async (products) => {
